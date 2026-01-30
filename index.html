@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Video in Text (Canvas Mirror)</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+}
+
+canvas {
+  width: 800px;
+  height: 300px;
+}
+</style>
+</head>
+<body>
+
+<video id="video" autoplay muted playsinline style="display:none"></video>
+<canvas id="canvas" width="800" height="300"></canvas>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    video.srcObject = stream;
+    video.play();
+  });
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // текст как маска
+  ctx.save();
+  ctx.font = "900 160px Arial Black";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("MIRROR", canvas.width / 2, canvas.height / 2);
+
+  // маска
+  ctx.globalCompositeOperation = "source-in";
+
+  // зеркалим видео
+  ctx.save();
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+  ctx.restore();
+
+  ctx.restore();
+  ctx.globalCompositeOperation = "source-over";
+
+  requestAnimationFrame(draw);
+}
+
+video.addEventListener("playing", draw);
+</script>
+
+</body>
+</html>
